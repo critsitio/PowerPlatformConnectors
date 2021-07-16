@@ -1,0 +1,434 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Critsit",
+    "contact": {
+      "name": "Advice and answers from Critsit Support",
+      "url": "https://critsit.io/contact",
+      "email": "support@critsit.io"
+    },
+    "description": "Integrate Critsit incident management into your business logic. Create new incident alerts, broadcast status to customers, and more."
+  },
+  "host": "api.critsit.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://critsit.io"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://critsit.io/terms"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "IT Operations;Security"
+    }
+  ],
+  "paths": {
+    "/schemas/incident": {
+      "get": {
+        "description": "Get a schema that includes the currently active incidents",
+        "summary": "Get Incident Schema",
+        "operationId": "GetIncidentSchema",
+        "parameters": [],
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetIncidentSchema"
+            }
+          }
+        }
+      }
+    },
+    "/schemas/broadcast": {
+      "get": {
+        "description": "Get Broadcast Schema",
+        "summary": "Get Broadcast Schema",
+        "operationId": "GetBroadcastSchema",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetBroadcastSchema"
+            }
+          }
+        }
+      }
+    },
+    "/schemas/active-broadcasts": {
+      "get": {
+        "description": "Get a list of currently active broadcasts",
+        "summary": "Get Broadcasts",
+        "operationId": "GetBroadcastOptions",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetActiveBroadcastsSchema"
+            }
+          }
+        }
+      }
+    },
+    "/incidents": {
+      "post": {
+        "description": "Create new Critsit incident",
+        "summary": "Create new Critsit incident",
+        "operationId": "CreateIncident",
+        "parameters": [
+          {
+            "name": "incidentSchema",
+            "in": "body",
+            "description": "Dynamic Incident Schema",
+            "schema": {
+              "$ref": "#/definitions/Incident"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessfulWriteSchema"
+            }
+          }
+        }
+      }
+    },
+    "/broadcasts": {
+      "post": {
+        "description": "Create New Status Broadcast",
+        "summary": "Create New Status Broadcast",
+        "operationId": "CreateBroadcast",
+        "parameters": [
+          {
+            "name": "broadcastSchema",
+            "in": "body",
+            "description": "Dynamic Broadcast Schema",
+            "schema": {
+              "$ref": "#/definitions/Broadcast"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessfulWriteSchema"
+            }
+          }
+        }
+      }
+    },
+    "/broadcasts/{broadcastId}/updates": {
+      "post": {
+        "description": "Update existing Status Broadcast",
+        "operationId": "CreateBroadcastUpdate",
+        "summary": "Update Status Broadcast",
+        "parameters": [
+          {
+            "name": "broadcastId",
+            "in": "path",
+            "type": "string",
+            "description": "Select broadcast to update",
+            "required": true,
+            "x-ms-summary": "Select List",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetBroadcastOptions",
+              "value-path": "id"
+            }
+          },
+          {
+            "name": "broadcastUpdate",
+            "in": "body",
+            "description": "Broadcast Update",
+            "schema": {
+              "$ref": "#/definitions/BroadcastUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessfulWriteSchema"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "BroadcastUpdate": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Progress Update",
+          "description": "Progress update"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "resolved",
+            "monitoring",
+            "identified",
+            "investigating"
+          ],
+          "x-ms-summary": "Current Status",
+          "description": "Current Status"
+        }
+      }
+    },
+    "Incident": {
+      "type": "object",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetIncidentSchema",
+        "parameters": {},
+        "value-path": "schema"
+      }
+    },
+    "Broadcast": {
+      "type": "object",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetBroadcastSchema",
+        "parameters": {},
+        "value-path": "schema"
+      }
+    },
+    "GetIncidentSchema": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "description": "Top level schema object",
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "Top level schema type",
+              "type": "string"
+            },
+            "required": {
+              "type": "array",
+              "description": "The list of required fields",
+              "items": {
+                "type": "string",
+                "description": "The name of a required field"
+              }
+            },
+            "properties": {
+              "type": "object",
+              "description": "The parameters of the schema",
+              "properties": {
+                "name": {
+                  "type": "object",
+                  "description": "The parameter for the name of the incident",
+                  "properties": {
+                    "type": {
+                      "description": "The parameter for the name's type",
+                      "type": "string"
+                    }
+                  }
+                },
+                "planId": {
+                  "type": "object",
+                  "description": "The defintion of a planId's schema",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "The type of the planId's type parameter"
+                    },
+                    "enum": {
+                      "type": "array",
+                      "description": "The description of the planId's enum field",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "summary": {
+                  "type": "object",
+                  "description": "The defintion of a summary schema",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "impact": {
+                  "type": "object",
+                  "description": "The defintion of an impact schema",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetBroadcastSchema": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "description": "Top level schema object",
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "Top level schema type",
+              "type": "string"
+            },
+            "required": {
+              "type": "array",
+              "description": "The list of required fields",
+              "items": {
+                "type": "string",
+                "description": "The name of a required field"
+              }
+            },
+            "properties": {
+              "type": "object",
+              "description": "The parameters of the schema",
+              "properties": {
+                "incidentId": {
+                  "description": "The defintion of a incidentId's schema",
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "description": "The type of the incidentId",
+                      "type": "string"
+                    },
+                    "enum": {
+                      "type": "array",
+                      "description": "A list of active incidents",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "planId": {
+                  "type": "object",
+                  "description": "The defintion of a planId's schema",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "The type of the planId's type parameter"
+                    },
+                    "enum": {
+                      "type": "array",
+                      "description": "The description of the planId's enum field",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "title": {
+                  "type": "object",
+                  "description": "The defintion of a title's schema",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "summary": {
+                  "type": "object",
+                  "description": "The defintion of an incident summary schema",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "progress": {
+                  "type": "object",
+                  "description": "The defintion of a progress update schema",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "severity": {
+                  "type": "object",
+                  "description": "The defintion of a broadcast severity's schema",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "enum": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "GetActiveBroadcastsSchema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the status broadcast"
+          }
+        }
+      }
+    },
+    "SuccessfulWriteSchema": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "description": "Confirmation that the request was successful",
+          "type": "boolean"
+        },
+        "id": {
+          "description": "The ID of the object created or updated",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ]
+}
